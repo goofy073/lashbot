@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"remnawave-tg-shop-bot/internal/database"
-	"remnawave-tg-shop-bot/internal/remnawave"
 
 	"github.com/google/uuid"
 )
@@ -125,8 +124,7 @@ func (h *WebhookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctxWithUsername := context.WithValue(ctx, remnawave.CtxKeyUsername, payment.Metadata["username"])
-	if err := h.processor.ProcessPurchaseById(ctxWithUsername, purchaseID); err != nil {
+	if err := h.processor.ProcessPurchaseById(ctx, purchaseID); err != nil {
 		slog.Error("yookassa webhook: process purchase failed", "purchase_id", purchaseID, "error", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
