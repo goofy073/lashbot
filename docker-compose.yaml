@@ -1,6 +1,7 @@
 services:
   bot:
     build: .
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -47,3 +48,9 @@ volumes:
     driver: local
     external: false
     name: remnawave-telegram-shop-db-data
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
