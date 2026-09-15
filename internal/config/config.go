@@ -24,6 +24,7 @@ type config struct {
 	moynalogURL, moynalogUsername, moynalogPassword           string
 	feedbackURL                                               string
 	channelURL                                                string
+	supportURL                                                string
 	tosURL                                                    string
 	isYookasaEnabled                                          bool
 	isCryptoEnabled                                           bool
