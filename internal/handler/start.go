@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-telegram/bot"
@@ -13,7 +11,6 @@ import (
 	"remnawave-tg-shop-bot/internal/config"
 	"remnawave-tg-shop-bot/internal/database"
 	"remnawave-tg-shop-bot/internal/menu"
-	"remnawave-tg-shop-bot/utils"
 )
 
 func (h Handler) StartCommandHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
