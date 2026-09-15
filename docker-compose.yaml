@@ -1,6 +1,6 @@
 services:
   bot:
-    image: ghcr.io/jolymmiels/remnawave-telegram-shop-bot:latest
+    build: .
     env_file:
       - .env
     depends_on:
