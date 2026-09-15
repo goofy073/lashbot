@@ -178,72 +178,7 @@ func (s *Service) SendStart(ctx context.Context, b *bot.Bot, chatID int64, text 
 	if err != nil {
 		return nil, err
 	}
-	if err := s.replacePin(ctx, b, chatID, message.ID); err != nil {
-		// Lack of pin permissions must not prevent using the delivered menu.
-		slog.Warn("Failed to update pinned start menu", "error", err)
-	}
 	return message, nil
-}
-
-func (s *Service) replacePin(ctx context.Context, b *bot.Bot, chatID int64, messageID int) error {
-	oldPins, err := s.store.ListPins(ctx, s.botID, chatID)
-	if err != nil {
-		return err
-	}
-	// Persist intent before the API call, so even a crash/timeout cannot leave
-	// an untracked bot pin. Failed unpins remain tracked for the next /start.
-	if err := s.store.TrackPin(ctx, s.botID, chatID, messageID); err != nil {
-		return err
-	}
-	if _, err := b.PinChatMessage(ctx, &bot.PinChatMessageParams{
-		ChatID: chatID, MessageID: messageID, DisableNotification: true,
-	}); err != nil {
-		// A confirmed permission denial cannot have created a pin. Do not
-		// accumulate cleanup work while the bot lacks rights; uncertain
-		// errors (timeouts, server errors, rate limits) must remain tracked.
-		if pinPermissionDenied(err) {
-			if cleanupErr := s.store.ForgetPin(ctx, s.botID, chatID, messageID); cleanupErr != nil {
-				slog.Warn("Failed to forget denied menu pin", "error", cleanupErr)
-			}
-		}
-		return err
-	}
-	var cleanupErrors []error
-	for _, oldID := range oldPins {
-		if oldID == messageID || oldID == 0 {
-			continue
-		}
-		_, err := b.UnpinChatMessage(ctx, &bot.UnpinChatMessageParams{ChatID: chatID, MessageID: oldID})
-		if err != nil && !missingPin(err) {
-			cleanupErrors = append(cleanupErrors, err)
-			continue
-		}
-		if err := s.store.ForgetPin(ctx, s.botID, chatID, oldID); err != nil {
-			cleanupErrors = append(cleanupErrors, err)
-		}
-	}
-	return errors.Join(cleanupErrors...)
-}
-
-func pinPermissionDenied(err error) bool {
-	if errors.Is(err, bot.ErrorForbidden) {
-		return true
-	}
-	if !errors.Is(err, bot.ErrorBadRequest) {
-		return false
-	}
-	text := strings.ToLower(err.Error())
-	return strings.Contains(text, "not enough rights") || strings.Contains(text, "chat_admin_required") ||
-		strings.Contains(text, "need administrator rights")
-}
-
-func missingPin(err error) bool {
-	if !errors.Is(err, bot.ErrorBadRequest) {
-		return false
-	}
-	text := strings.ToLower(err.Error())
-	return strings.Contains(text, "message to unpin not found") || strings.Contains(text, "message is not pinned") ||
-		strings.Contains(text, "message_id_invalid")
 }
 
 // Edit preserves the existing photo and message ID (including its pin).
