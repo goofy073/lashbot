@@ -24,8 +24,6 @@ type config struct {
 	moynalogURL, moynalogUsername, moynalogPassword           string
 	feedbackURL                                               string
 	channelURL                                                string
-	serverStatusURL                                           string
-	supportURL                                                string
 	tosURL                                                    string
 	isYookasaEnabled                                          bool
 	isCryptoEnabled                                           bool
@@ -33,7 +31,6 @@ type config struct {
 	isMoynalogEnabled                                         bool
 	adminTelegramId                                           int64
 	privateChannelID                                          int64
-	miniApp                                                   string
 	enableAutoPayment                                         bool
 	healthCheckPort                                           int
 	tributeWebhookUrl, tributeAPIKey, tributePaymentUrl       string
@@ -113,10 +110,6 @@ func IsPlategaEnabled() bool {
 		conf.isPlategaCryptoEnabled
 }
 
-func GetMiniAppURL() string {
-	return conf.miniApp
-}
-
 func GetBlockedTelegramIds() map[int64]bool {
 	return conf.blockedTelegramIds
 }
@@ -131,10 +124,6 @@ func FeedbackURL() string {
 
 func ChannelURL() string {
 	return conf.channelURL
-}
-
-func ServerStatusURL() string {
-	return conf.serverStatusURL
 }
 
 func SupportURL() string {
@@ -357,8 +346,6 @@ func InitConfig() {
 		return isWebAppLinkEnabled
 	}()
 
-	conf.miniApp = envStringDefault("MINI_APP_URL", "")
-
 	conf.defaultLanguage = envStringDefault("DEFAULT_LANGUAGE", "ru")
 
 	conf.daysInMonth = envIntDefault("DAYS_IN_MONTH", 30)
@@ -410,7 +397,6 @@ func InitConfig() {
 		conf.isPlategaCryptoEnabled = envBool("PLATEGA_CRYPTO_ENABLED")
 	}
 
-	conf.serverStatusURL = os.Getenv("SERVER_STATUS_URL")
 	conf.supportURL = os.Getenv("SUPPORT_URL")
 	conf.feedbackURL = os.Getenv("FEEDBACK_URL")
 	conf.channelURL = os.Getenv("CHANNEL_URL")

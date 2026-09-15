@@ -120,9 +120,6 @@ func (s PaymentService) ProcessPurchaseById(ctx context.Context, purchaseId int6
 	_, err = s.telegramBot.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: customer.TelegramID,
 		Text:   s.translation.GetText(customer.Language, "subscription_activated") + "\n\n" + inviteUrl,
-		ReplyMarkup: models.InlineKeyboardMarkup{
-			InlineKeyboard: s.createConnectKeyboard(customer),
-		},
 	})
 	if err != nil {
 		return err
@@ -150,22 +147,6 @@ func (s PaymentService) ProcessPurchaseById(ctx context.Context, purchaseId int6
 	slog.Info("purchase processed", "purchase_id", utils.MaskHalfInt64(purchase.ID), "type", purchase.InvoiceType, "customer_id", utils.MaskHalfInt64(customer.ID))
 
 	return nil
-}
-
-func (s PaymentService) createConnectKeyboard(customer *database.Customer) [][]models.InlineKeyboardButton {
-	var inlineCustomerKeyboard [][]models.InlineKeyboardButton
-
-	bd := s.translation.GetButton(customer.Language, "connect_button")
-	if config.GetMiniAppURL() != "" {
-		inlineCustomerKeyboard = append(inlineCustomerKeyboard, []models.InlineKeyboardButton{bd.InlineWebApp(config.GetMiniAppURL())})
-	} else {
-		inlineCustomerKeyboard = append(inlineCustomerKeyboard, []models.InlineKeyboardButton{bd.InlineCallback("connect")})
-	}
-
-	inlineCustomerKeyboard = append(inlineCustomerKeyboard, []models.InlineKeyboardButton{
-		s.translation.GetButton(customer.Language, "back_button").InlineCallback("start"),
-	})
-	return inlineCustomerKeyboard
 }
 
 func (s PaymentService) CreatePurchase(ctx context.Context, amount float64, months int, customer *database.Customer, invoiceType database.InvoiceType) (url string, purchaseId int64, err error) {

@@ -18,7 +18,7 @@ func (s PaymentService) refreshPurchaseMenu(ctx context.Context, purchaseID int6
 	}
 	_, err := s.telegramBot.EditMessageReplyMarkup(ctx, &bot.EditMessageReplyMarkupParams{
 		ChatID: customer.TelegramID, MessageID: messageID,
-		ReplyMarkup: models.InlineKeyboardMarkup{InlineKeyboard: s.createConnectKeyboard(customer)},
+		ReplyMarkup: models.InlineKeyboardMarkup{},
 	})
 	if err != nil {
 		slog.Warn("Failed to update menu after payment", "error", err)
